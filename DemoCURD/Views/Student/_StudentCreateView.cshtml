@@ -1,0 +1,45 @@
+﻿@model Student
+
+<form id="studentCreateForm">
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input type="text" class="form-control" asp-for="Name" placeholder="Enter name">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+
+<script>
+    (function () {
+        $("#studentCreateForm").on("submit", function (e) {
+            e.preventDefault();
+
+            let formData = new FormData();
+
+            let data = objectifyForm($(this).serializeArray());
+
+            for (var key in data) {
+                formData.append(key, data[key]);
+            }
+
+            console.log(data);
+
+            $.ajax({
+                url: "/Student/Create",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    window.dispatchEvent(new Event('studentCreateEvent'));
+
+                    if (response) {
+                        console.log("Saved!");
+                    } else {
+                        console.log("Error!");
+                    }
+                }
+            });
+        });
+    })();
+</script>

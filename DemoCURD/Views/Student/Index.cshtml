@@ -1,0 +1,142 @@
+﻿@model List<Student>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<button id="addStudent" class="btn btn-primary">Add  New</button>
+<div id="studentList" style="margin-top: 100px;">
+    <table id="studentTable" class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <td>Name</td>
+                <td>Action</td>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+
+<div id="createModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="create-body" style="padding: 20px;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="editModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="edit-body" style="padding: 20px;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        (function () {
+
+            var studentTable = $("#studentTable").dataTable({
+                "processing": true,
+                "serverSide": true,
+                "filter": true,
+                "pageLength": 10,
+                "autoWidth": false,
+                "lengthMenu": [[10, 50, 100, 150, 200, 500], [10, 50, 100, 150, 200, 500]],
+                "order": [[0, "desc"]],
+                "ajax": {
+                    "url": "/Student/LoadStudent/",
+                    "type": "POST",
+                    "data": function (data) {
+                    },
+                    "complete": function (json) {
+                    }
+                },
+                "columns": [
+                    { "data": "name", "name": "Name", "autowidth": true },
+                    {
+                        "render": function (data, type, full, meta) {
+                            return `<button style="font-size: inherit;" class="btn btn-sm btn-rx btn-table detailsBtn" value="${full.id}" data-toggle="tooltip" title="Student details">Detail</button>
+                                    <button style="font-size: inherit;" class="btn btn-sm btn-rx btn-table editBtn" value="${full.id}" data-toggle="tooltip" title="Update student info!">Edit</button>
+                                    <button style="font-size: inherit;" class="btn btn-sm btn-rx btn-table deleteBtn" value="${full.id}" data-toggle="tooltip" title="Delete student!">Delete</button>`;
+                        }
+                    }
+                ]
+            });
+
+            $("#addStudent").on("click", function (e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: "/Student/CreateView",
+                    type: "GET",
+                    success: function (response) {
+                        $("#create-body").html(response);
+                        $("#createModal").modal("show");
+                    }
+                })
+            });
+
+            $("body").on("click", ".editBtn", function (e) {
+                e.preventDefault();
+
+                let value = $(this).val();
+
+                $.ajax({
+                    url: "/Student/EditView",
+                    type: "GET",
+                    data: { id: value },
+                    success: function (response) {
+                        $("#edit-body").html(response);
+                        $("#editModal").modal("show");
+                    }
+                });
+            });
+
+            $("body").on("click", ".deleteBtn", function (e) {
+
+                e.preventDefault();
+
+                let value = $(this).val();
+
+                $.ajax({
+                    url: '/Student/Delete',
+                    data: { id: value },
+                    type: 'GET',
+                    success: function (response) {
+                        studentTable.fnFilter();
+                    }
+                });
+            });
+
+            $(window).on('studentCreateEvent', function () {
+                studentTable.fnFilter();
+            });
+
+            $(window).on('studentEditEvent', function () {
+                studentTable.fnFilter();
+            });
+
+        })();
+    </script>
+}

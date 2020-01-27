@@ -1,0 +1,46 @@
+﻿@model Student
+
+<form id="studentEditForm">
+    <input asp-for="Id" type="hidden" />
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input type="text" class="form-control" asp-for="Name" placeholder="Enter name">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+
+<script>
+    (function () {
+        $("#studentEditForm").on("submit", function (e) {
+            e.preventDefault();
+
+            let formData = new FormData();
+
+            let data = objectifyForm($(this).serializeArray());
+
+            for (var key in data) {
+                formData.append(key, data[key]);
+            }
+
+            console.log(data);
+
+            $.ajax({
+                url: "/Student/Edit",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    window.dispatchEvent(new Event('studentEditEvent'));
+
+                    if (response) {
+                        console.log("Saved!");
+                    } else {
+                        console.log("Error!");
+                    }
+                }
+            });
+        });
+    })();
+</script>
